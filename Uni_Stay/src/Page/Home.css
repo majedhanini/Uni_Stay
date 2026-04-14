@@ -351,6 +351,8 @@
 .step-item:hover .step-card {
   transform: translateY(-4px);
   border-color: #c9ced6;
+
+
 }
 
 .step-item:active .step-card {
