@@ -21,8 +21,7 @@ function Header() {
             <li><a href="/#why-us">لماذا تختار منصتنا</a></li>
             <li><a href="/#how-it-works">كيف تعمل منصتنا</a></li>
           </ul>
-        </nav>
-
+        </nav> 
         <div className="nav-left">
           <Link to="/student" className="login-link">تسجيل الدخول</Link>
           <Link to="/owner" className="add-btn">أضف عقارك</Link>
