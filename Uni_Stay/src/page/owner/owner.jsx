@@ -1,5 +1,4 @@
 
-لقد أرسلت
 import { useState } from "react";
 import "../student/student.css";
 import Header from "../../components/Header/Header";
