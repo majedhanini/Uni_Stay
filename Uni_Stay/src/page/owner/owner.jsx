@@ -45,6 +45,7 @@ function Owner() {
           <img src={heroImage} alt="صورة سكن طلابي" />
         </div>
 
+
         <div className="student-hero-overlay"></div>
 
         <div className="student-hero-content">
