@@ -2,12 +2,11 @@
 import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { TextField } from "@mui/material";
-import ContactSidebar from "../Component/ContactSidebar";
-import MobileContactBar from "../Component/MobileContactBar";
+import ContactSidebar from "../components/ContactSidebar";
+import MobileContactBar from "../components/MobileContactBar";
 import Footer from "../components/Footer/Footer";
-import Comments from "../Component/comments";
-import ImagesCarousel from "../Component/Carousel";
+import Comments from "../components/comments";
+import ImagesCarousel from "../components/Carousel";
 
 
 
@@ -24,7 +23,7 @@ const ResDetails = () => {
 
     useEffect(() => {
         const getHotel = async () => {
-            const res = await fetch(https://api.escuelajs.co/api/v1/categories/${id})
+            const res = await fetch(`https://api.escuelajs.co/api/v1/categories/${id}`)
             if (!res.ok) {
                 console.log("API error:", res.status)
                 return
@@ -204,7 +203,7 @@ return (
                     className="card overflow-hidden"
                        key={4}
                     style={{ backgroundColor: "#474545", position: "relative", cursor: "pointer" }}
-                    onClick={() => setShowModal(true)}
+                    /* onClick={() => setShowModal(true)} */
                     >
                     <img src={images[4]} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     {restImages && (

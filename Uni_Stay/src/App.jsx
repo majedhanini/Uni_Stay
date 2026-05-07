@@ -1,32 +1,32 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+// import "./App.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Header from './components/Header/Header'
-import Footer from './components/Footer/Footer'
-import FooterPages from './components/Footer/FooterPages'
+import Home from "./Page/Home";
+import Student from "./Page/StudenLogin";
+import Owner from "./Page/owner/owner";
 
-function AppContent() {
-  const location = useLocation()
-
-  return (
-    <>
-      <Header />
-
-      <Routes>
-        <Route path="/" element={<h1 style={{ textAlign: "center" }}>Home Page</h1>} />
-        <Route path="/other" element={<h1 style={{ textAlign: "center" }}>Other Page</h1>} />
-      </Routes>
-
-      {location.pathname === "/" ? <Footer /> : <FooterPages />}
-    </>
-  )
-}
+import StudentRegister from "./Page/student/RegisterPage";
+import OwnerRegister from "./Page/ownerRegister";
+import AddProperty from "./Page/AddProperty";
+import AllResidence from "./Page/ListingsPage";
+import ResDetails from "./Page/PropertyDetails";
 
 function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/student" element={<Student />} />
+        <Route path="/owner" element={<Owner />} />
+        <Route path="/student-register" element={<StudentRegister />} />
+        <Route path="/owner-register" element={<OwnerRegister />} />
+        <Route path="/add-property" element={<AddProperty />} />
+        <Route path="/all-residence" element={<AllResidence />} />
+        <Route path="/details/:id" element={<ResDetails />} />
+      </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;
+

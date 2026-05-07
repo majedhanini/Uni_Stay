@@ -1,9 +1,10 @@
 
 import { useState } from "react";
-import "../Student/Register.css";
-import Header from "../../component/Header/Header";
-import FooterPages from "../../component/Footer/Footer";
-import heroImage from "../../assets/images/login-bg.jpg";
+import "./RegisterPage.css";
+import Header from "../../components/Header/Header";
+import FooterPages from "../../components/Footer/FooterPages";
+import heroImage from "../../assets/images/IMG_6971.jpg";
+
 
 function StudentRegister() {
   const [fullName, setFullName] = useState("");
