@@ -1,8 +1,8 @@
 import { useState } from "react";
-import "./student/RegisterPage.css";
-import Header from "../components/Header/Header";
-import FooterPages from "../components/Footer/FooterPages";
-import heroImage from "../assets/images/IMG_6971.jpg";
+import "../Student/RegisterPage.css";
+import Header from "../../components/Header/Header";
+import FooterPages from "../../components/Footer/FooterPages";
+import heroImage from "../../assets/images/IMG_6971.jpg";
 
 
 function OwnerRegister() {

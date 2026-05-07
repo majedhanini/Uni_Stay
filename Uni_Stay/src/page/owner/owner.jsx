@@ -1,11 +1,14 @@
-
 import { useState } from "react";
-import "../StudentLogin.css";
+import { useNavigate } from "react-router-dom";
+
+import "../Student/StudentLogin.css";
 import Header from "../../components/Header/Header";
 import FooterPages from "../../components/Footer/FooterPages";
 import heroImage from "../../assets/images/bwb_jm_lnjh.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
 
 function Owner() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -36,6 +39,8 @@ function Owner() {
     }
 
     alert("تم تسجيل دخول صاحب السكن بنجاح");
+
+    navigate("/add-property");
   };
 
   return (
@@ -45,7 +50,6 @@ function Owner() {
           <img src={heroImage} alt="صورة سكن طلابي" />
         </div>
 
-
         <div className="student-hero-overlay"></div>
 
         <div className="student-hero-content">
@@ -54,7 +58,9 @@ function Owner() {
           <main className="login-wrapper">
             <section className="login-card">
               <h2>أهلًا بك في UniStay</h2>
-              <p className="subtitle">سجّل الدخول كصاحب سكن للوصول إلى حسابك</p>
+              <p className="subtitle">
+                سجّل الدخول كصاحب سكن للوصول إلى حسابك
+              </p>
 
               <div className="user-type">
                 <button
@@ -77,6 +83,7 @@ function Owner() {
               <form onSubmit={handleSubmit}>
                 <div className="input-group">
                   <label htmlFor="email">البريد الإلكتروني</label>
+
                   <input
                     type="email"
                     id="email"

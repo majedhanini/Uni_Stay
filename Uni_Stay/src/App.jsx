@@ -1,32 +1,41 @@
-// import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Home from "./Page/Home";
-import Student from "./Page/StudenLogin";
-import Owner from "./Page/owner/owner";
+// Home
+import Home from "./Page/Home/Home";
 
-import StudentRegister from "./Page/student/RegisterPage";
-import OwnerRegister from "./Page/ownerRegister";
-import AddProperty from "./Page/AddProperty";
-import AllResidence from "./Page/ListingsPage";
-import ResDetails from "./Page/PropertyDetails";
+// Student Pages
+import Student from "./Page/Student/StudenLogin";
+import StudentRegister from "./Page/Student/RegisterPage";
+import AllResidence from "./Page/Student/ListingsPage";
+import ResDetails from "./Page/Student/PropertyDetails";
+
+// Owner Pages
+import Owner from "./Page/Owner/owner";
+import OwnerRegister from "./Page/Owner/ownerRegister";
+import AddProperty from "./Page/Owner/AddProperty";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+
+        {/* Home */}
         <Route path="/" element={<Home />} />
+
+        {/* Student */}
         <Route path="/student" element={<Student />} />
-        <Route path="/owner" element={<Owner />} />
         <Route path="/student-register" element={<StudentRegister />} />
-        <Route path="/owner-register" element={<OwnerRegister />} />
-        <Route path="/add-property" element={<AddProperty />} />
         <Route path="/all-residence" element={<AllResidence />} />
         <Route path="/details/:id" element={<ResDetails />} />
+
+        {/* Owner */}
+        <Route path="/owner" element={<Owner />} />
+        <Route path="/owner-register" element={<OwnerRegister />} />
+        <Route path="/add-property" element={<AddProperty />} />
+
       </Routes>
     </BrowserRouter>
   );
 }
 
 export default App;
-
