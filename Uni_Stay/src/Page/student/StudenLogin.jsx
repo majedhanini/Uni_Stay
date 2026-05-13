@@ -27,7 +27,7 @@ function Student() {
     event.preventDefault();
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!email.trim() || !password.trim()) {
@@ -35,7 +35,35 @@ function Student() {
       return;
     }
 
-    alert("تم تسجيل دخول الطالب بنجاح");
+    try {
+      const response = await fetch(
+        "https://6a041e312afe8349b4b5ea02.mockapi.io/students"
+      );
+
+      const students = await response.json();
+
+      const user = students.find(
+        (student) =>
+          student.email === email &&
+          student.password === password
+      );
+
+      if (user) {
+        alert("تم تسجيل الدخول بنجاح");
+
+        localStorage.setItem(
+          "student",
+          JSON.stringify(user)
+        );
+
+        window.location.href = "/";
+      } else {
+        alert("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+      }
+    } catch (error) {
+      console.log(error);
+      alert("فشل الاتصال بالسيرفر");
+    }
   };
 
   return (

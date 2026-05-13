@@ -60,8 +60,9 @@ function AddProperty() {
     setSelectedFiles(files);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+
     setErrorMessage("");
 
     if (
@@ -79,7 +80,89 @@ function AddProperty() {
       return;
     }
 
-    alert("تم تجهيز البيانات للنشر");
+    const propertyData = {
+      title: formData.title,
+
+      description: formData.description,
+
+      propertyType: formData.housingType,
+
+      availableFor: formData.availableFor,
+
+      location: formData.address,
+
+      neighborhood: formData.neighborhood,
+
+      monthlyPrice: formData.monthlyPrice,
+
+      distanceFromUniversity:
+        formData.distanceFromUniversity,
+
+      capacity: formData.capacity,
+
+      rooms: formData.rooms,
+
+      bathrooms: formData.bathrooms,
+
+      wifi: services.wifi,
+
+      parking: services.parking,
+
+      security: services.security,
+
+      images:
+        selectedFiles.length > 0
+          ? selectedFiles[0].name
+          : "",
+
+      ownerId: "1",
+    };
+
+    try {
+      const response = await fetch(
+        "https://6a04295c2afe8349b4b5fde3.mockapi.io/properties",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(propertyData),
+        }
+      );
+
+      if (response.ok) {
+        alert("تم نشر العقار بنجاح");
+
+        setFormData({
+          title: "",
+          description: "",
+          housingType: "",
+          availableFor: "",
+          address: "",
+          neighborhood: "",
+          monthlyPrice: "",
+          distanceFromUniversity: "",
+          capacity: "",
+          rooms: "",
+          bathrooms: "",
+        });
+
+        setServices({
+          wifi: false,
+          parking: false,
+          security: false,
+        });
+
+        setSelectedFiles([]);
+
+        setErrorMessage("");
+      } else {
+        setErrorMessage("حدث خطأ أثناء نشر العقار");
+      }
+    } catch (error) {
+      console.log(error);
+      setErrorMessage("فشل الاتصال بالسيرفر");
+    }
   };
 
   return (
@@ -88,21 +171,35 @@ function AddProperty() {
 
       <main className="add-property-page">
         <section className="add-property-hero">
-          <img src={heroImage} alt="خلفية إضافة العقار" className="hero-bg" />
+          <img
+            src={heroImage}
+            alt="خلفية إضافة العقار"
+            className="hero-bg"
+          />
+
           <div className="add-property-hero-overlay"></div>
 
           <div className="add-property-hero-content">
-            <span className="hero-badge">لوحة إضافة عقار</span>
-            <h1>أضف عقارك وابدأ استقبال الطلبات</h1>
+            <span className="hero-badge">
+              لوحة إضافة عقار
+            </span>
+
+            <h1>
+              أضف عقارك وابدأ استقبال الطلبات
+            </h1>
+
             <p>
-              املأ البيانات التالية لعرض السكن للطلاب بطريقة احترافية وسهلة
-              وواضحة
+              املأ البيانات التالية لعرض السكن
+              للطلاب بطريقة احترافية وسهلة وواضحة
             </p>
           </div>
         </section>
 
         <div className="add-property-container">
-          <form onSubmit={handleSubmit} className="add-property-form">
+          <form
+            onSubmit={handleSubmit}
+            className="add-property-form"
+          >
             <section className="property-section">
               <h2 className="section-title">
                 <FaCircleInfo />
@@ -112,6 +209,7 @@ function AddProperty() {
               <div className="basic-info-grid">
                 <div className="full-width-field">
                   <label>عنوان الإعلان</label>
+
                   <input
                     type="text"
                     name="title"
@@ -123,6 +221,7 @@ function AddProperty() {
 
                 <div className="full-width-field">
                   <label>الوصف</label>
+
                   <textarea
                     name="description"
                     placeholder="اكتب وصفًا تفصيليًا للسكن..."
@@ -133,30 +232,57 @@ function AddProperty() {
 
                 <div className="select-field">
                   <label>نوع السكن</label>
+
                   <select
                     name="housingType"
                     value={formData.housingType}
                     onChange={handleInputChange}
                   >
-                    <option value="">اختر نوع السكن</option>
-                    <option value="شقة">شقة</option>
-                    <option value="غرفة">غرفة</option>
-                    <option value="استوديو">استوديو</option>
-                    <option value="منزل">منزل</option>
+                    <option value="">
+                      اختر نوع السكن
+                    </option>
+
+                    <option value="شقة">
+                      شقة
+                    </option>
+
+                    <option value="غرفة">
+                      غرفة
+                    </option>
+
+                    <option value="استوديو">
+                      استوديو
+                    </option>
+
+                    <option value="منزل">
+                      منزل
+                    </option>
                   </select>
                 </div>
 
                 <div className="select-field">
                   <label>متاح لـ</label>
+
                   <select
                     name="availableFor"
                     value={formData.availableFor}
                     onChange={handleInputChange}
                   >
-                    <option value="">اختر الفئة</option>
-                    <option value="طلاب">طلاب</option>
-                    <option value="طالبات">طالبات</option>
-                    <option value="الكل">الكل</option>
+                    <option value="">
+                      اختر الفئة
+                    </option>
+
+                    <option value="طلاب">
+                      طلاب
+                    </option>
+
+                    <option value="طالبات">
+                      طالبات
+                    </option>
+
+                    <option value="الكل">
+                      الكل
+                    </option>
                   </select>
                 </div>
               </div>
@@ -214,6 +340,7 @@ function AddProperty() {
               <div className="property-grid">
                 <div className="spec-card">
                   <label>سعة السكن</label>
+
                   <input
                     type="number"
                     name="capacity"
@@ -226,6 +353,7 @@ function AddProperty() {
 
                 <div className="spec-card">
                   <label>عدد الغرف</label>
+
                   <input
                     type="number"
                     name="rooms"
@@ -238,6 +366,7 @@ function AddProperty() {
 
                 <div className="spec-card">
                   <label>عدد الحمامات</label>
+
                   <input
                     type="number"
                     name="bathrooms"
@@ -259,8 +388,12 @@ function AddProperty() {
               <div className="services-grid">
                 <button
                   type="button"
-                  className={`service-card ${services.wifi ? "active" : ""}`}
-                  onClick={() => toggleService("wifi")}
+                  className={`service-card ${
+                    services.wifi ? "active" : ""
+                  }`}
+                  onClick={() =>
+                    toggleService("wifi")
+                  }
                 >
                   <FaWifi />
                   <p>إنترنت WiFi</p>
@@ -268,8 +401,14 @@ function AddProperty() {
 
                 <button
                   type="button"
-                  className={`service-card ${services.parking ? "active" : ""}`}
-                  onClick={() => toggleService("parking")}
+                  className={`service-card ${
+                    services.parking
+                      ? "active"
+                      : ""
+                  }`}
+                  onClick={() =>
+                    toggleService("parking")
+                  }
                 >
                   <FaCar />
                   <p>موقف سيارات</p>
@@ -277,8 +416,14 @@ function AddProperty() {
 
                 <button
                   type="button"
-                  className={`service-card ${services.security ? "active" : ""}`}
-                  onClick={() => toggleService("security")}
+                  className={`service-card ${
+                    services.security
+                      ? "active"
+                      : ""
+                  }`}
+                  onClick={() =>
+                    toggleService("security")
+                  }
                 >
                   <FaShieldHalved />
                   <p>أمن وحراسة</p>
@@ -294,18 +439,40 @@ function AddProperty() {
 
               <label className="upload-box">
                 <FaImages className="upload-icon" />
-                <p>اضغط لتحميل الصور أو اسحبها هنا</p>
-                <small>PNG, JPG حتى 5MB</small>
-                <input type="file" multiple onChange={handleFileChange} />
+
+                <p>
+                  اضغط لتحميل الصور أو اسحبها هنا
+                </p>
+
+                <small>
+                  PNG, JPG حتى 5MB
+                </small>
+
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleFileChange}
+                />
+
                 {selectedFiles.length > 0 && (
-                  <p id="file-name">تم اختيار {selectedFiles.length} صورة</p>
+                  <p id="file-name">
+                    تم اختيار{" "}
+                    {selectedFiles.length} صورة
+                  </p>
                 )}
               </label>
             </section>
 
-            {errorMessage && <p id="error-message">{errorMessage}</p>}
+            {errorMessage && (
+              <p id="error-message">
+                {errorMessage}
+              </p>
+            )}
 
-            <button type="submit" className="publish-btn">
+            <button
+              type="submit"
+              className="publish-btn"
+            >
               نشر الإعلان
             </button>
           </form>

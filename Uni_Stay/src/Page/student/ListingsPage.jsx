@@ -1,25 +1,43 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
 import SideBar from "../../components/Sidebar/SideBar";
 import MobileSidebar from "../../components/Sidebar/MobileSidebar";
-import Header from "../../components/Header/Header";
-
 import Footer from "../../components/Footer/Footer";
-
 
 const AllResidence = () => {
   const navigate = useNavigate();
-  const [data, setData] = useState([]);
-  const [smallScreen, setSmallScreen] = useState(window.innerWidth >= 1000);
+  const location = useLocation();
+
+  const [data, setData] = useState(
+    location.state?.properties || []
+  );
+
+  const [smallScreen, setSmallScreen] = useState(
+    window.innerWidth >= 1000
+  );
+
   const [liked, setLiked] = useState({});
+
   useEffect(() => {
-    const getData = async () => {
-      const res = await fetch("https://api.escuelajs.co/api/v1/categories");
-      const data = await res.json();
-      setData(data);
+    const getAllProperties = async () => {
+      try {
+        const response = await fetch(
+          "https://6a04295c2afe8349b4b5fde3.mockapi.io/properties"
+        );
+
+        const result = await response.json();
+
+        if (!location.state?.properties) {
+          setData(result);
+        }
+      } catch (error) {
+        console.log(error);
+      }
     };
-    getData();
-  }, []);
+
+    getAllProperties();
+  }, [location.state]);
 
   useEffect(() => {
     const handelSmallScreen = () => {
@@ -27,15 +45,14 @@ const AllResidence = () => {
     };
 
     window.addEventListener("resize", handelSmallScreen);
-    return () => window.removeEventListener("resize", handelSmallScreen);
+
+    return () => {
+      window.removeEventListener("resize", handelSmallScreen);
+    };
   }, []);
 
   return (
     <>
-      {/* <div style={{  padding: '40px' }}>
-                <Header></Header>
-            </div> */}
-
       <div
         className="d-flex p-4"
         style={{
@@ -45,71 +62,141 @@ const AllResidence = () => {
         }}
       >
         <div className="col-12 col-md-12 col-lg-9">
-          <p className="pt-4" style={{ color: "gray" }}>
+          <p
+            className="pt-4"
+            style={{
+              color: "gray",
+              fontSize: "18px",
+              fontWeight: "600",
+            }}
+          >
             {data.length} results
           </p>
-          {!smallScreen && <MobileSidebar></MobileSidebar>}
+
+          {!smallScreen && <MobileSidebar />}
+
           <div className="row">
-            {data.map((hotel) => (
-              <div className="col-6 col-md-4 col-lg-4 mb-4" key={hotel?.id}>
+            {data.map((property) => (
+              <div
+                className="col-12 col-md-6 col-lg-4 mb-4"
+                key={property?.id}
+              >
                 <div
-                  className="card me-2"
-                  style={{ cursor: "pointer", color: "#1b2a41" }}
+                  className="card shadow-sm border-0 h-100"
+                  style={{
+                    cursor: "pointer",
+                    borderRadius: "18px",
+                    overflow: "hidden",
+                  }}
                 >
                   <img
-                    src={hotel?.image}
-                    style={{ aspectRatio: "14/15" }}
-                    alt={hotel?.name}
+                    src={
+                      property?.images?.[0] ||
+                      "https://via.placeholder.com/400x300"
+                    }
+                    alt={property?.title}
+                    style={{
+                      width: "100%",
+                      height: "250px",
+                      objectFit: "cover",
+                    }}
                   />
+
                   <div className="card-body bg-light">
-                    <h5 className="card-title">{hotel?.name}</h5>
-                    <div className="d-flex w-100 justify-content-around ">
+                    <h5
+                      className="card-title"
+                      style={{
+                        color: "#1b2a41",
+                        fontWeight: "700",
+                      }}
+                    >
+                      {property?.title}
+                    </h5>
+
+                    <p
+                      style={{
+                        color: "#666",
+                        minHeight: "50px",
+                      }}
+                    >
+                      {property?.description}
+                    </p>
+
+                    <div className="mb-2">
+                      <span
+                        style={{
+                          fontWeight: "600",
+                          color: "#1b2a41",
+                        }}
+                      >
+                        📍 {property?.address}
+                      </span>
+                    </div>
+
+                    <div className="mb-2">
+                      <span
+                        style={{
+                          fontWeight: "600",
+                          color: "#1b2a41",
+                        }}
+                      >
+                        💰 {property?.monthlyPrice} ₪
+                      </span>
+                    </div>
+
+                    <div className="mb-3">
+                      <span
+                        style={{
+                          color: "#777",
+                        }}
+                      >
+                        ⏱ {property?.distanceFromUniversity} دقائق عن الجامعة
+                      </span>
+                    </div>
+
+                    <div className="d-flex justify-content-between align-items-center">
                       <button
                         className="btn"
                         style={{
                           width: "80%",
-                          height: "40px",
-                          borderRadius: "8px",
+                          height: "45px",
+                          borderRadius: "10px",
                           backgroundColor: "#1b2a41",
                           color: "white",
+                          fontWeight: "600",
                         }}
-                        onClick={() => navigate(`/details/${hotel?.id}`)}
+                        onClick={() =>
+                          navigate( `/details/${property?.id}`)
+                        }
                       >
-                        info
+                        عرض التفاصيل
                       </button>
 
-                      {/* 
-                                            <button className="bg-light" style={{width:"15%",
-                                                                            height: "40px",
-                                                                            borderRadius: "8px",
-                                                                            backgroundColor: "lightgrey",
-                                                                            color:"#1b2a41"}}>
-                                                <i className="" class="bi bi-heart" style={{fontSize:"30px"}}></i>
-                                            </button> */}
                       <div
+                        style={{
+                          cursor: "pointer",
+                        }}
                         onClick={() =>
                           setLiked((prev) => ({
                             ...prev,
-                            [hotel.id]: !prev[hotel.id],
+                            [property.id]: !prev[property.id],
                           }))
                         }
                       >
-                        {liked[hotel.id] ? (
+                        {liked[property.id] ? (
                           <i
                             className="bi bi-heart-fill"
                             style={{
-                              fontSize: "35px",
-                              position: "relative",
-                              bottom: "3.5px",
+                              fontSize: "32px",
+                              color: "red",
                             }}
                           ></i>
                         ) : (
                           <i
                             className="bi bi-heart"
                             style={{
-                              fontSize: "35px",
-                              position: "relative",
-                              bottom: "3.5px",
+                              fontSize: "32px",
+                              color: "#1b2a41",
                             }}
                           ></i>
                         )}
@@ -121,9 +208,11 @@ const AllResidence = () => {
             ))}
           </div>
         </div>
-        {smallScreen && <SideBar></SideBar>}
+
+        {smallScreen && <SideBar />}
       </div>
-      <Footer></Footer>
+
+      <Footer />
     </>
   );
 };
