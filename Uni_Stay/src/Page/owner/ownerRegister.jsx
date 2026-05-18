@@ -1,10 +1,17 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../../lib/api.js";
+
 import "../Student/RegisterPage.css";
+
 import Header from "../../components/Header/Header";
 import FooterPages from "../../components/Footer/FooterPages";
-import heroImage from "../../assets/images/IMG_6971.jpg";
+
+import heroImage from "../../assets/images/bwb_jm_lnjh.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
 
 function OwnerRegister() {
+  const navigate = useNavigate();
+
   const [fullName, setFullName] = useState("");
   const [identityNumber, setIdentityNumber] = useState("");
   const [email, setEmail] = useState("");
@@ -12,15 +19,17 @@ function OwnerRegister() {
   const [housingAddress, setHousingAddress] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
+
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleStudentClick = () => {
-    window.location.href = "/student-register";
+    navigate("/student-register");
   };
 
   const handleOwnerClick = () => {
-    window.location.href = "/owner-register";
+    navigate("/owner-register");
   };
 
   const handleSubmit = async (event) => {
@@ -39,84 +48,43 @@ function OwnerRegister() {
       return;
     }
 
-    if (fullName.trim().length < 4) {
-      alert("يرجى إدخال اسم كامل صحيح");
-      return;
-    }
-
-    if (
-      !/^[0-9]+$/.test(identityNumber) ||
-      identityNumber.trim().length < 6
-    ) {
-      alert("يرجى إدخال رقم هوية صحيح");
-      return;
-    }
-
-    if (!email.includes("@") || !email.includes(".")) {
-      alert("يرجى إدخال بريد إلكتروني صحيح");
-      return;
-    }
-
-    if (!/^[0-9]+$/.test(phone) || phone.trim().length < 10) {
-      alert("يرجى إدخال رقم هاتف صحيح");
-      return;
-    }
-
-    if (housingAddress.trim().length < 4) {
-      alert("يرجى إدخال عنوان سكن صحيح");
-      return;
-    }
-
-    if (password.trim().length < 6) {
-      alert("كلمة المرور يجب أن تكون 6 خانات على الأقل");
-      return;
-    }
-
     if (password !== confirmPassword) {
       alert("كلمتا المرور غير متطابقتين");
       return;
     }
 
-    const newOwner = {
-      fullName,
-      identityNumber,
-      email,
-      phone,
-      housingAddress,
-      password,
-      role: "owner",
-    };
-
     try {
-      const response = await fetch(
-        "https://6a041e312afe8349b4b5ea02.mockapi.io/owners",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newOwner),
-        }
-      );
+      const nameParts = fullName.trim().split(" ");
 
-      if (response.ok) {
-        alert("تم إنشاء حساب صاحب السكن بنجاح");
+      const first_name = nameParts[0];
 
-        setFullName("");
-        setIdentityNumber("");
-        setEmail("");
-        setPhone("");
-        setHousingAddress("");
-        setPassword("");
-        setConfirmPassword("");
+      const last_name = nameParts.slice(1).join(" ") || " ";
 
-        window.location.href = "/owner";
-      } else {
-        alert("حدث خطأ أثناء إنشاء الحساب");
-      }
+      await api.post("/owner/register", {
+        first_name,
+        last_name,
+        email,
+        password,
+        phone_num: phone,
+      });
+
+      setFullName("");
+      setIdentityNumber("");
+      setEmail("");
+      setPhone("");
+      setHousingAddress("");
+      setPassword("");
+      setConfirmPassword("");
+
+      navigate("/owner");
     } catch (error) {
-      console.log(error);
-      alert("فشل الاتصال بالسيرفر");
+      console.error(error);
+
+      if (error.response) {
+        alert(error.response.data.message);
+      } else {
+        alert("فشل الاتصال بالسيرفر");
+      }
     }
   };
 
@@ -160,9 +128,7 @@ function OwnerRegister() {
 
               <form onSubmit={handleSubmit}>
                 <div className="input-group">
-                  <label htmlFor="fullName">
-                    الاسم الكامل
-                  </label>
+                  <label htmlFor="fullName">الاسم الكامل</label>
 
                   <input
                     type="text"
@@ -170,16 +136,12 @@ function OwnerRegister() {
                     name="fullName"
                     placeholder="أدخل اسمك الكامل"
                     value={fullName}
-                    onChange={(event) =>
-                      setFullName(event.target.value)
-                    }
+                    onChange={(event) => setFullName(event.target.value)}
                   />
                 </div>
 
                 <div className="input-group">
-                  <label htmlFor="identityNumber">
-                    رقم الهوية
-                  </label>
+                  <label htmlFor="identityNumber">رقم الهوية</label>
 
                   <input
                     type="text"
@@ -187,16 +149,12 @@ function OwnerRegister() {
                     name="identityNumber"
                     placeholder="مثال: 123456789"
                     value={identityNumber}
-                    onChange={(event) =>
-                      setIdentityNumber(event.target.value)
-                    }
+                    onChange={(event) => setIdentityNumber(event.target.value)}
                   />
                 </div>
 
                 <div className="input-group">
-                  <label htmlFor="email">
-                    البريد الإلكتروني
-                  </label>
+                  <label htmlFor="email">البريد الإلكتروني</label>
 
                   <input
                     type="email"
@@ -204,16 +162,12 @@ function OwnerRegister() {
                     name="email"
                     placeholder="example@email.com"
                     value={email}
-                    onChange={(event) =>
-                      setEmail(event.target.value)
-                    }
+                    onChange={(event) => setEmail(event.target.value)}
                   />
                 </div>
 
                 <div className="input-group">
-                  <label htmlFor="phone">
-                    رقم الهاتف
-                  </label>
+                  <label htmlFor="phone">رقم الهاتف</label>
 
                   <input
                     type="text"
@@ -221,16 +175,12 @@ function OwnerRegister() {
                     name="phone"
                     placeholder="0599123456"
                     value={phone}
-                    onChange={(event) =>
-                      setPhone(event.target.value)
-                    }
+                    onChange={(event) => setPhone(event.target.value)}
                   />
                 </div>
 
                 <div className="input-group">
-                  <label htmlFor="housingAddress">
-                    عنوان السكن
-                  </label>
+                  <label htmlFor="housingAddress">عنوان السكن</label>
 
                   <input
                     type="text"
@@ -238,86 +188,59 @@ function OwnerRegister() {
                     name="housingAddress"
                     placeholder="المنطقة والشارع"
                     value={housingAddress}
-                    onChange={(event) =>
-                      setHousingAddress(event.target.value)
-                    }
+                    onChange={(event) => setHousingAddress(event.target.value)}
                   />
                 </div>
 
                 <div className="input-group">
-                  <label htmlFor="password">
-                    كلمة المرور
-                  </label>
+                  <label htmlFor="password">كلمة المرور</label>
 
                   <div className="password-box">
                     <button
                       type="button"
                       className="toggle-password"
-                      onClick={() =>
-                        setShowPassword((prev) => !prev)
-                      }
+                      onClick={() => setShowPassword((prev) => !prev)}
                     >
                       {showPassword ? "إخفاء" : "إظهار"}
                     </button>
 
                     <input
-                      type={
-                        showPassword ? "text" : "password"
-                      }
+                      type={showPassword ? "text" : "password"}
                       id="password"
                       name="password"
                       placeholder="أدخل كلمة المرور"
                       value={password}
-                      onChange={(event) =>
-                        setPassword(event.target.value)
-                      }
+                      onChange={(event) => setPassword(event.target.value)}
                     />
                   </div>
                 </div>
 
                 <div className="input-group">
-                  <label htmlFor="confirmPassword">
-                    تأكيد كلمة المرور
-                  </label>
+                  <label htmlFor="confirmPassword">تأكيد كلمة المرور</label>
 
                   <div className="password-box">
                     <button
                       type="button"
                       className="toggle-password"
-                      onClick={() =>
-                        setShowConfirmPassword(
-                          (prev) => !prev
-                        )
-                      }
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
                     >
-                      {showConfirmPassword
-                        ? "إخفاء"
-                        : "إظهار"}
+                      {showConfirmPassword ? "إخفاء" : "إظهار"}
                     </button>
 
                     <input
-                      type={
-                        showConfirmPassword
-                          ? "text"
-                          : "password"
-                      }
+                      type={showConfirmPassword ? "text" : "password"}
                       id="confirmPassword"
                       name="confirmPassword"
                       placeholder="أعد إدخال كلمة المرور"
                       value={confirmPassword}
                       onChange={(event) =>
-                        setConfirmPassword(
-                          event.target.value
-                        )
+                        setConfirmPassword(event.target.value)
                       }
                     />
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  className="submit-btn"
-                >
+                <button type="submit" className="submit-btn">
                   إنشاء حساب صاحب سكن
                 </button>
               </form>

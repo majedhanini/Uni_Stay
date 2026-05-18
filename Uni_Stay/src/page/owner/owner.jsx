@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../../lib/api.js";
 
 import "../Student/StudentLogin.css";
+
 import Header from "../../components/Header/Header";
 import FooterPages from "../../components/Footer/FooterPages";
+
 import heroImage from "../../assets/images/bwb_jm_lnjh.jpg__1320x740_q95_crop_subsampling-2_upscale.jpg";
 
 function Owner() {
@@ -14,16 +17,16 @@ function Owner() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleStudentClick = () => {
-    window.location.href = "/student";
+    navigate("/student");
   };
 
   const handleOwnerClick = () => {
-    window.location.href = "/owner";
+    navigate("/owner");
   };
 
   const handleCreateAccount = (event) => {
     event.preventDefault();
-    window.location.href = "/owner-register";
+    navigate("/owner-register");
   };
 
   const handleForgotPassword = (event) => {
@@ -39,29 +42,26 @@ function Owner() {
     }
 
     try {
-      const response = await fetch(
-        "https://6a041e312afe8349b4b5ea02.mockapi.io/owners"
-      );
+      const response = await api.post("/owner/login", {
+        email,
+        password,
+      });
 
-      const data = await response.json();
+      const data = response.data;
 
-      const owner = data.find(
-        (item) =>
-          item.email === email &&
-          item.password === password
-      );
+      localStorage.setItem("token", data.token);
 
-      if (!owner) {
-        alert("البريد الإلكتروني أو كلمة المرور غير صحيحة");
-        return;
-      }
-
-      alert("تم تسجيل دخول صاحب السكن بنجاح");
+      localStorage.setItem("owner", JSON.stringify(data.user));
 
       navigate("/add-property");
     } catch (error) {
-      console.log(error);
-      alert("حدث خطأ");
+      console.error(error);
+
+      if (error.response) {
+        alert(error.response.data.message);
+      } else {
+        alert("فشل الاتصال بالسيرفر");
+      }
     }
   };
 
@@ -81,9 +81,7 @@ function Owner() {
             <section className="login-card">
               <h2>أهلًا بك في UniStay</h2>
 
-              <p className="subtitle">
-                سجّل الدخول كصاحب سكن للوصول إلى حسابك
-              </p>
+              <p className="subtitle">سجّل الدخول كصاحب سكن للوصول إلى حسابك</p>
 
               <div className="user-type">
                 <button
@@ -105,9 +103,7 @@ function Owner() {
 
               <form onSubmit={handleSubmit}>
                 <div className="input-group">
-                  <label htmlFor="email">
-                    البريد الإلكتروني
-                  </label>
+                  <label htmlFor="email">البريد الإلكتروني</label>
 
                   <input
                     type="email"
@@ -115,39 +111,29 @@ function Owner() {
                     name="email"
                     placeholder="example@email.com"
                     value={email}
-                    onChange={(event) =>
-                      setEmail(event.target.value)
-                    }
+                    onChange={(event) => setEmail(event.target.value)}
                   />
                 </div>
 
                 <div className="input-group">
-                  <label htmlFor="password">
-                    كلمة المرور
-                  </label>
+                  <label htmlFor="password">كلمة المرور</label>
 
                   <div className="password-box">
                     <button
                       type="button"
                       className="toggle-password"
-                      onClick={() =>
-                        setShowPassword((prev) => !prev)
-                      }
+                      onClick={() => setShowPassword((prev) => !prev)}
                     >
                       {showPassword ? "إخفاء" : "إظهار"}
                     </button>
 
                     <input
-                      type={
-                        showPassword ? "text" : "password"
-                      }
+                      type={showPassword ? "text" : "password"}
                       id="password"
                       name="password"
                       placeholder="أدخل كلمة المرور"
                       value={password}
-                      onChange={(event) =>
-                        setPassword(event.target.value)
-                      }
+                      onChange={(event) => setPassword(event.target.value)}
                     />
                   </div>
                 </div>
@@ -162,20 +148,13 @@ function Owner() {
                   </a>
                 </div>
 
-                <button
-                  type="submit"
-                  className="submit-btn"
-                >
+                <button type="submit" className="submit-btn">
                   تسجيل الدخول
                 </button>
 
                 <p className="switch-text">
                   ليس لديك حساب؟
-
-                  <a
-                    href="#"
-                    onClick={handleCreateAccount}
-                  >
+                  <a href="#" onClick={handleCreateAccount}>
                     {" "}
                     إنشاء حساب
                   </a>
