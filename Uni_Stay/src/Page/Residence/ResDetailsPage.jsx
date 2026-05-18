@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ContactSidebar from "../../components/Contact/ContactSidebar.jsx";
@@ -10,17 +9,21 @@ import Feedback from "../../components/Comments/feedback.jsx";
 import ImagesCarousel from "../../components/Carousel/Carousel.jsx";
 import Header from "../../components/Header/Header.jsx";
 
+const BASE_URL = "http://localhost:3000";
+
 const ResDetailsPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
   const [hotel, setHotel] = useState(null);
-  const [images, setImages] = useState([]); 
+  const [images, setImages] = useState([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth >= 768);
   const [selected, setSelected] = useState(0);
   const [mobileSelectedImage, setMobileSelectedImage] = useState(0);
   const [moreImagesButton, setMoreImagesButton] = useState(false);
   const [clicked, setClicked] = useState(false);
+  const [average, setAverage] = useState(null);
+  const [totalRatings, setTotalRatings] = useState(0);
 
   const token = localStorage.getItem("token");
 
@@ -28,63 +31,58 @@ const ResDetailsPage = () => {
   useEffect(() => {
     const getHotel = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/residence/${id}`);
-
+        const res = await fetch(`${BASE_URL}/residence/${id}`);
         if (!res.ok) {
           console.log("API error:", res.status);
           return;
         }
-
         const data = await res.json();
-
         console.log(data);
         setHotel(data.residence);
-        setImages(data.residence.ResidenceImages); // ✅ CHANGE 2: populate images state
+        setImages(data.residence.ResidenceImages);
       } catch (err) {
         console.error(err);
       }
     };
+    if (id) getHotel();
+  }, [id]);
 
-    if (id) {
-      getHotel();
-    }
+  // ================= GET AVERAGE RATING =================
+  useEffect(() => {
+    const getAverage = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/Ratings/residence/${id}/average`);
+        const data = await res.json();
+        setAverage(data.average);
+        setTotalRatings(data.total);
+      } catch (error) {
+        console.error("Error fetching average:", error);
+      }
+    };
+    if (id) getAverage();
   }, [id]);
 
   // ================= GET WISHLIST STATE =================
   useEffect(() => {
-    if (id && token) {
-      getLikedResidence();
-    }
+    if (id && token) getLikedResidence();
   }, [id]);
 
   // ================= RESPONSIVE =================
   useEffect(() => {
-    const handleIsMobileState = () => {
-      setIsMobile(window.innerWidth >= 768);
-    };
-
+    const handleIsMobileState = () => setIsMobile(window.innerWidth >= 768);
     window.addEventListener("resize", handleIsMobileState);
-
-    return () => {
-      window.removeEventListener("resize", handleIsMobileState);
-    };
+    return () => window.removeEventListener("resize", handleIsMobileState);
   }, []);
 
   // ================= ADD / REMOVE WISHLIST =================
   const addToWishList = async () => {
     try {
       const method = clicked ? "DELETE" : "POST";
-
-      const res = await fetch(`http://localhost:3000/wishlist/${id}`, {
+      const res = await fetch(`${BASE_URL}/wishlist/${id}`, {
         method: method,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (res.ok) {
-        setClicked(!clicked);
-      }
+      if (res.ok) setClicked(!clicked);
     } catch (err) {
       console.error("Wishlist error:", err);
     }
@@ -93,19 +91,14 @@ const ResDetailsPage = () => {
   // ================= CHECK IF LIKED =================
   const getLikedResidence = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/wishlist/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const res = await fetch(`${BASE_URL}/wishlist/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       if (!res.ok) {
         console.log("Error fetching wishlist state");
         return;
       }
-
       const data = await res.json();
-
       setClicked(data.isWishlisted);
     } catch (err) {
       console.error("Wishlist error:", err);
@@ -114,13 +107,8 @@ const ResDetailsPage = () => {
 
   if (!hotel) return <div className="text-center">Loading</div>;
 
-  // ✅ CHANGE 3: removed "const images = hotel.ResidenceImages" — now using state instead
+  const func = () => (clicked ? "bi bi-heart-fill" : "bi bi-heart");
 
-  const func = () => {
-    return clicked ? "bi bi-heart-fill" : "bi bi-heart";
-  };
-
-  // ✅ CHANGE 4: swap clicked image with main image (index 0)
   const handleSelectedPic = (i) => {
     if (i === 0) return;
     setImages((prev) => {
@@ -131,50 +119,82 @@ const ResDetailsPage = () => {
     setSelected(0);
   };
 
-  const Amenities = [
-    "Wi-Fi",
-    "Air Conditioning",
-    "Swimming Pool",
-    "Gym",
-    "Room Service",
-    "Parking",
-  ];
-
   let restImages = 0;
-
   if (images.length - 5 === 0) {
     restImages = false;
   } else {
     restImages = images.length - 5;
   }
 
-  const handleMoreImagesButton = () => {
-    setMoreImagesButton(true);
+  const handleMoreImagesButton = () => setMoreImagesButton(true);
+
+  // ================= AVERAGE STARS RENDERER =================
+  const renderAverageStars = () => {
+    if (!average)
+      return (
+        <p style={{ color: "gray", fontSize: "0.85rem" }}>
+          لا يوجد تقييمات بعد
+        </p>
+      );
+
+    const fullStars = Math.floor(average);
+    const hasHalf = average - fullStars >= 0.25 && average - fullStars < 0.75;
+    const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
+
+    return (
+      <div className="d-flex align-items-center gap-2">
+        <div className="d-flex gap-1">
+          {[...Array(fullStars)].map((_, i) => (
+            <i
+              key={`full-${i}`}
+              className="bi bi-star-fill"
+              style={{ color: "#f5c518" }}
+            />
+          ))}
+          {hasHalf && (
+            <i className="bi bi-star-half" style={{ color: "#f5c518" }} />
+          )}
+          {[...Array(emptyStars)].map((_, i) => (
+            <i
+              key={`empty-${i}`}
+              className="bi bi-star"
+              style={{ color: "#f5c518" }}
+            />
+          ))}
+        </div>
+        <span style={{ color: "#1b2a41", fontWeight: "600" }}>{average}</span>
+        <span style={{ color: "gray", fontSize: "0.85rem" }}>
+          ({totalRatings} تقييم)
+        </span>
+      </div>
+    );
   };
 
   return (
     <>
       <div style={{ display: "block", marginBottom: "100px" }}>
-        <Header></Header>
+        <Header />
       </div>
+
       {moreImagesButton && (
         <div
           style={{
             position: "absolute",
             width: "100%",
-            backgroundColor: "black",
+            backgroundColor: "#1b2a41",
             zIndex: "555",
             padding: "20px",
             top: "3.5%",
             left: "50%",
             transform: "translate(-50%)",
+            marginTop: "65px",
           }}
         >
           <p
             style={{
               position: "absolute",
-              top: 0,
-              right: "18px",
+              top: "18px",
+              right: "25px",
               color: "white",
               cursor: "pointer",
             }}
@@ -182,7 +202,6 @@ const ResDetailsPage = () => {
           >
             X
           </p>
-
           <div
             style={{
               width: "82%",
@@ -191,7 +210,11 @@ const ResDetailsPage = () => {
               transform: "translate(-5%)",
             }}
           >
-            <ImagesCarousel image={images[0]?.image_url} />
+            <ImagesCarousel
+              images={images.slice(4)}
+              totalImages={images.length}
+              startIndex={4}
+            />
           </div>
         </div>
       )}
@@ -201,15 +224,15 @@ const ResDetailsPage = () => {
         style={{ backgroundColor: "white" }}
       >
         {/* BACK BUTTON */}
-        <div className="mb-3 d-flex" onClick={() => navigate("/all-residence")}>
+        <div
+          className="mb-3 d-flex"
+          style={{ cursor: "pointer" }}
+          onClick={() => navigate("/all-residence")}
+        >
           <ArrowBackIcon sx={{ color: "#1b2a41" }} />
-
           <p
             className="mb-3"
-            style={{
-              textDecoration: "none",
-              color: "#1b2a41",
-            }}
+            style={{ textDecoration: "none", color: "#1b2a41" }}
           >
             <b> العودة لكل السكنات</b>
           </p>
@@ -217,7 +240,7 @@ const ResDetailsPage = () => {
 
         {/* IMAGES SECTION */}
         <div className="d-flex">
-          {/* LEFT IMAGES - only on desktop, only if more than 1 image */}
+          {/* LEFT IMAGES */}
           <div
             className={`${images.length >= 2 ? "col-md-6 col-lg-5" : "d-none"}`}
           >
@@ -231,7 +254,6 @@ const ResDetailsPage = () => {
                   direction: "ltr",
                 }}
               >
-                {/* EXACTLY 2 IMAGES — second image fills full height of left column */}
                 {images.length === 2 && (
                   <div
                     className="card"
@@ -243,17 +265,16 @@ const ResDetailsPage = () => {
                     onClick={() => handleSelectedPic(1)}
                   >
                     <img
-                      src={images[1]?.image_url}
+                      src={`${BASE_URL}${images[1]?.image_url}`}
                       style={{
                         width: "100%",
-                        height: "50%",
+                        height: "100%",
                         objectFit: "cover",
                       }}
                     />
                   </div>
                 )}
 
-                {/* EXACTLY 3 IMAGES — original grid behavior */}
                 {images.length === 3 &&
                   images.slice(1, 3).map((img, index) => (
                     <div
@@ -263,7 +284,7 @@ const ResDetailsPage = () => {
                       onClick={() => handleSelectedPic(index + 1)}
                     >
                       <img
-                        src={img?.image_url}
+                        src={`${BASE_URL}${img?.image_url}`}
                         style={{
                           width: "100%",
                           height: "100%",
@@ -273,7 +294,6 @@ const ResDetailsPage = () => {
                     </div>
                   ))}
 
-                {/* 4+ IMAGES — original behavior */}
                 {images.length >= 4 && (
                   <>
                     {images.slice(1, 4).map((img, index) => (
@@ -284,7 +304,7 @@ const ResDetailsPage = () => {
                         onClick={() => handleSelectedPic(index + 1)}
                       >
                         <img
-                          src={img?.image_url}
+                          src={`${BASE_URL}${img?.image_url}`}
                           style={{
                             width: "100%",
                             height: "100%",
@@ -293,7 +313,6 @@ const ResDetailsPage = () => {
                         />
                       </div>
                     ))}
-
                     {restImages > 0 && (
                       <div
                         className="card overflow-hidden"
@@ -301,7 +320,7 @@ const ResDetailsPage = () => {
                         onClick={() => handleSelectedPic(4)}
                       >
                         <img
-                          src={images[4]?.image_url}
+                          src={`${BASE_URL}${images[4]?.image_url}`}
                           style={{
                             width: "100%",
                             height: "100%",
@@ -347,24 +366,16 @@ const ResDetailsPage = () => {
             <div className="card">
               {isMobile && (
                 <img
-                  src={images[selected]?.image_url}
-                  style={{
-                    aspectRatio: "5/4",
-                    height: "58vh",
-                  }}
+                  src={`${BASE_URL}${images[selected]?.image_url}`}
+                  style={{ aspectRatio: "5/4", height: "58vh" }}
                 />
               )}
-
               {!isMobile && (
                 <img
-                  src={images[mobileSelectedImage]?.image_url}
-                  style={{
-                    aspectRatio: "5/4",
-                    height: "58vh",
-                  }}
+                  src={`${BASE_URL}${images[mobileSelectedImage]?.image_url}`}
+                  style={{ aspectRatio: "5/4", height: "58vh" }}
                 />
               )}
-
               {!isMobile && (
                 <p
                   style={{
@@ -415,7 +426,7 @@ const ResDetailsPage = () => {
                     }}
                   >
                     <img
-                      src={img?.image_url}
+                      src={`${BASE_URL}${img?.image_url}`}
                       className="card"
                       style={{ height: "100%", pointerEvents: "none" }}
                     />
@@ -425,6 +436,7 @@ const ResDetailsPage = () => {
             )}
           </div>
         </div>
+
         {/* DETAILS SECTION */}
         <div className="row mt-5">
           {/* CONTACT */}
@@ -493,7 +505,6 @@ const ResDetailsPage = () => {
                   </div>
                 </div>
               </div>
-
               <div className="col-3">
                 <div
                   className="p-2 rounded"
@@ -506,7 +517,6 @@ const ResDetailsPage = () => {
                   </div>
                 </div>
               </div>
-
               <div className="col-3">
                 <div
                   className="p-2 rounded"
@@ -519,7 +529,6 @@ const ResDetailsPage = () => {
                   </div>
                 </div>
               </div>
-
               <div className="col-3">
                 <div
                   className="p-2 rounded"
@@ -532,7 +541,6 @@ const ResDetailsPage = () => {
                   </div>
                 </div>
               </div>
-
               <div className="col-3">
                 <div
                   className="p-2 rounded"
@@ -547,7 +555,6 @@ const ResDetailsPage = () => {
                   </div>
                 </div>
               </div>
-
               <div className="col-3">
                 <div
                   className="p-2 rounded"
@@ -556,11 +563,10 @@ const ResDetailsPage = () => {
                   <i className="bi bi-mortarboard me-1" />
                   <small>المسافة عن الجامعة</small>
                   <div>
-                    <strong>{hotel.distance_from_university}م</strong>
+                    <strong>{hotel.distance_from_university}د</strong>
                   </div>
                 </div>
               </div>
-
               <div className="col-3">
                 <div
                   className="p-2 rounded"
@@ -611,13 +617,7 @@ const ResDetailsPage = () => {
 
             {/* RATING */}
             <h4 style={{ color: "#1b2a41" }}>التقييم</h4>
-            <div className="d-flex">
-              <i className="bi bi-star-fill" style={{ color: "#f5c518" }} />
-              <i className="bi bi-star-fill" style={{ color: "#f5c518" }} />
-              <i className="bi bi-star-fill" style={{ color: "#f5c518" }} />
-              <i className="bi bi-star-fill" style={{ color: "#f5c518" }} />
-              <i className="bi bi-star-fill" style={{ color: "#f5c518" }} />
-            </div>
+            {renderAverageStars()}
           </div>
         </div>
 
